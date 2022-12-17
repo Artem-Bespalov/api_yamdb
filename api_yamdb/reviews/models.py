@@ -4,20 +4,10 @@ from django.db import models
 
 from .validators import validate_year
 
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
-
 
 class User(AbstractUser):
     """Модель пользователя."""
-    
+
     USER = 'user'
     ADMIN = 'admin'
     MODERATOR = 'moderator'

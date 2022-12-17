@@ -5,13 +5,13 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title, User
 
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsAuthorModeratorAdminOrReadOnly)
@@ -22,31 +22,21 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 @api_view(('POST',))
 def signup(request):
-    """
-    Регистрация пользователя с отправкой кода подтверждения на почту.
-    """
+    """Регистрация и отправка кода на почту."""
     serializer = SignupSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.validated_data['username']
-    email = serializer.validated_data['email']
     try:
-        user, _ = User.objects.get_or_create(
-            username=username,
-            email=email,
-        )
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
     except IntegrityError:
-        return Response(
-            'Пользователь с таким username-email не найден',
-            status=status.HTTP_400_BAD_REQUEST
+        raise ValidationError(
+            'username или email уже используются', status.HTTP_400_BAD_REQUEST
         )
-        
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
-        subject='Код подтверждения',
+        subject='Регистрация в проекте YaMDb.',
         message=f'Ваш код подтверждения: {confirmation_code}',
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[email],
-        fail_silently=False,
+        recipient_list=[user.email]
     )
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -75,17 +65,18 @@ class UserViewSet(viewsets.ModelViewSet):
     """ Информация о пользователях."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAdmin, )
+    filter_backends = (SearchFilter, )
     search_fields = ('username',)
     lookup_field = 'username'
-    
+
     @action(
         detail=False,
         methods=['get', 'patch'],
         url_path='me',
         permission_classes=(IsAuthenticated,)
     )
-    def me(self, request):
+    def me(self, request, pk=None):
         instance = request.user
         if request.method == 'GET':
             serializer = self.get_serializer(instance)
@@ -103,7 +94,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = ()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter, )
     search_fields = ('name', )
     lookup_field = 'slug'
@@ -112,7 +103,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # permission_classes = ()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name', )
     lookup_field = 'slug'
@@ -121,12 +112,12 @@ class GenreViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    # permission_classes = ()
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    # permission_classes = ()
+    permission_classes = (IsAuthorModeratorAdminOrReadOnly, )
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
 
@@ -143,7 +134,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
-    # permission_classes = ()
+    permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
     serializer_class = ReviewSerializer
 
     def get_queryset(self):

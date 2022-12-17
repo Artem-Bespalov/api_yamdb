@@ -2,13 +2,18 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class SignupSerializer(serializers.Serializer):
     """Сериализатор регистрации пользователя."""
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=50
+    )
+    email = serializers.EmailField(required=True, max_length=50)
+
     class Meta:
         model = User
         fields = ('username', 'email',)
@@ -24,12 +29,20 @@ class SignupSerializer(serializers.Serializer):
 
 class TokenSerializer(serializers.Serializer):
     """Сериализатор получения токена авторизации."""
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(
+        required=True
+    )
     confirmation_code = serializers.CharField(required=True)
 
 
 class UserSerializer(serializers.ModelSerializer):
     '''Сериализатор модели пользователя'''
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=50
+    )
+
     class Meta:
         model = User
         fields = (
