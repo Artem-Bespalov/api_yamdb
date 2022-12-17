@@ -9,10 +9,10 @@ ADMIN = 'admin'
 MODERATOR = 'moderator'
 
 ROLES = [
-        (USER, USER),
-        (ADMIN, ADMIN),
-        (MODERATOR, MODERATOR),
-    ]
+    (USER, USER),
+    (ADMIN, ADMIN),
+    (MODERATOR, MODERATOR),
+]
 
 
 class User(AbstractUser):
@@ -69,6 +69,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
 
 class Category(models.Model):
     """Категории произведений."""
