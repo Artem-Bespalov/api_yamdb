@@ -4,18 +4,20 @@ from django.db import models
 
 from .validators import validate_year
 
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLES = [
-        (USER, USER),
-        (ADMIN, ADMIN),
-        (MODERATOR, MODERATOR),
-    ]
-
 
 class User(AbstractUser):
+    """Модель пользователя."""
+    
+    USER = 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+
+    USER_ROLES = (
+        (USER, 'Пользователь'),
+        (ADMIN, 'Администратор'),
+        (MODERATOR, 'Модератор'),
+    )
+
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -45,22 +47,10 @@ class User(AbstractUser):
     role = models.CharField(
         'Роль',
         max_length=20,
-        choices=ROLES,
+        choices=USER_ROLES,
         default=USER,
         blank=True
     )
-
-    @property
-    def is_user(self):
-        return self.role == USER
-
-    @property
-    def is_admin(self):
-        return self.role == ADMIN
-
-    @property
-    def is_moderator(self):
-        return self.role == MODERATOR
 
     class Meta:
         ordering = ('id',)
@@ -69,6 +59,21 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    @property
+    def is_admin(self):
+        return (
+            self.role == self.ADMIN
+            or self.is_superuser
+            or self.is_staff
+        )
+
+    @property
+    def is_moderator(self):
+        return (
+            self.role == self.MODERATOR
+        )
+
 
 class Category(models.Model):
     """Категории произведений."""
