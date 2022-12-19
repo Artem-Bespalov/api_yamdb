@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import validate_year
+from .validators import validate_username, validate_year
 
 
 class User(AbstractUser):
@@ -19,6 +19,7 @@ class User(AbstractUser):
     )
 
     username = models.CharField(
+        validators=(validate_username, ),
         max_length=150,
         unique=True,
         blank=False,
@@ -201,7 +202,7 @@ class Review(models.Model):
         verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'],
+                fields=['title', 'author', ],
                 name='Автор может поставить только одну оценку')
         ]
 
