@@ -71,8 +71,16 @@ class CategorySerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+        lookup_field = 'slug'
+
+
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True)
     rating = serializers.SerializerMethodField()
 
     def get_rating(self, obj):
@@ -110,12 +118,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                 )
             return value
 
-
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
 class CommentSerializer(serializers.ModelSerializer):
