@@ -43,6 +43,12 @@ class UserSerializer(serializers.ModelSerializer):
         max_length=50
     )
 
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует!')
+        return value
+
     class Meta:
         model = User
         fields = (
@@ -117,7 +123,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                     'Год создания должен быть нашей эры и не больше текущего.'
                 )
             return value
-
 
 
 class CommentSerializer(serializers.ModelSerializer):

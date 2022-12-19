@@ -9,6 +9,7 @@ def validate_year(value):
             f'{value} не может быть больше текущего'
         )
 
+
 def validate_username(value):
     if value == 'me':
         raise ValidationError(

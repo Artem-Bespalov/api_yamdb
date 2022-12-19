@@ -22,14 +22,11 @@ class User(AbstractUser):
         validators=(validate_username, ),
         max_length=150,
         unique=True,
-        blank=False,
-        null=False
+        null=True
     )
     email = models.EmailField(
         max_length=254,
-        unique=True,
-        blank=False,
-        null=False
+        unique=True
     )
     first_name = models.CharField(
         'Имя',
