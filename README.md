@@ -38,3 +38,9 @@
 <li><p>Получение пользователя по username (GET): http://127.0.0.1:8000/api/v1/users/{username}/</p></li>
 <li><p>Получение данных своей учетной записи (GET): http://127.0.0.1:8000/api/v1/users/me/</p></li>
 </ul>
+
+<h2>Авторы проекта:</h2>
+
+<h3>Екатерина Богомолова https://github.com/Ekaterishe4ka</h3>
+<h3>Данил Аникин https://github.com/BestTpaktop</h3>
+<h3>Артем Беспалов https://github.com/Artem-Bespalov</h3>
