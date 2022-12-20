@@ -85,12 +85,12 @@ class Category(models.Model):
         verbose_name='Слаг категории'
     )
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Genre(models.Model):
@@ -104,12 +104,12 @@ class Genre(models.Model):
         verbose_name='Слаг жанра'
     )
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Title(models.Model):
@@ -142,12 +142,12 @@ class Title(models.Model):
         blank=True
     )
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class GenreTitle(models.Model):
@@ -181,7 +181,7 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Автор отзыва'
     )
-    score = models.IntegerField(
+    score = models.PositiveIntegerField(
         'Оценка',
         validators=(
             MinValueValidator(1),

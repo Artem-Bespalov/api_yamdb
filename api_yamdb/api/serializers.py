@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
@@ -36,7 +35,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    '''Сериализатор модели пользователя'''
+    """Сериализатор модели пользователя"""
     username = serializers.RegexField(
         regex=r'^[\w.@+-]',
         required=True,
@@ -47,6 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError(
                 'Пользователь с таким именем уже существует!')
+        return value
+
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким email уже существует!')
         return value
 
     class Meta:
@@ -87,11 +93,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        return rating if not rating else round(rating, 0)
+    rating = serializers.IntegerField()
 
     class Meta:
         fields = (
@@ -151,7 +153,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate_score(self, value):
-        if 0 > value > 10:
+        if 1 > value or value > 10:
             raise serializers.ValidationError(
                 'Оценка должна быть не менее 1 и не более 10'
             )
