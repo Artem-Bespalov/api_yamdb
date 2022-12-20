@@ -48,7 +48,6 @@ class UserSerializer(serializers.ModelSerializer):
                 'Пользователь с таким именем уже существует!')
         return value
 
-
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
